@@ -1,0 +1,12 @@
+node_modules/
+dist/
+data/
+out/
+tmp/
+.vs/
+coverage/
+*.local
+.env
+.DS_Store
+*.tsbuildinfo
+docs/prompt-vault-resume-project-materials.txt
