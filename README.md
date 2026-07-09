@@ -1,112 +1,122 @@
 # Prompt Vault
 
-Local-first prompt management for people and small teams who reuse prompts often.
+Prompt Vault 是一个本地优先的 Prompt 管理工具，面向高频使用 AI 的个人和小团队。它不负责调用大模型，也不默认把 Prompt 发送到云端，而是帮助用户把可复用的 Prompt 从零散文本沉淀为可分类、可检索、可版本化、可导入导出的本地资产。
 
-Prompt Vault is not a model-calling platform and does not send prompts to a cloud service by default. It focuses on turning reusable prompts from scattered text into local assets that can be categorized, searched, versioned, restored, and shared through JSON packages.
+## 项目定位
 
-## What It Does
+在日常 AI 使用中，Prompt 往往散落在聊天记录、文档、笔记和临时文件里，复用时需要反复查找、复制和改写。Prompt Vault 试图解决的是 Prompt 的沉淀、整理和复用问题：
 
-- Create, edit, delete, favorite, and pin prompts.
-- Organize prompts by scenes and tags.
-- Search titles, descriptions, content, use cases, model hints, and tag names.
-- Keep prompt version history and restore older versions.
-- Compare different prompt versions line by line.
-- Import and export JSON packages containing prompts, tags, scenes, and versions.
-- Run as a local web app or an Electron desktop app.
+- 把 Prompt 从一次性文本变成本地资产。
+- 用场景、标签、搜索和收藏降低查找成本。
+- 用版本记录和恢复能力支持持续迭代。
+- 用 JSON 导入导出支持迁移、备份和分享。
+- 用本地 SQLite 存储降低隐私和依赖风险。
 
-## What It Does Not Do
+## 核心功能
 
-- It does not call LLM APIs.
-- It does not include agent workflow orchestration.
-- It does not provide cloud sync, accounts, SSO, permissions, or audit logs.
-- It does not include real-time multi-user editing.
+- 创建、编辑、删除 Prompt。
+- 收藏和置顶常用 Prompt。
+- 使用场景和标签组织 Prompt。
+- 搜索标题、描述、正文、使用场景、模型提示和标签名称。
+- 自动保留 Prompt 版本历史。
+- 恢复历史版本。
+- 对比不同版本的 Prompt 内容差异。
+- 导入和导出 JSON 分享包，包含 prompts、tags、scenes 和 versions。
+- 支持本地 Web 应用和 Electron 桌面端。
 
-## Tech Stack
+## 当前不包含
 
-- Frontend: React, TypeScript, Vite
-- Backend: Fastify
-- Storage: SQLite through Node.js `node:sqlite`, with FTS5 search
-- Desktop: Electron
-- Tests: Vitest, Testing Library, jsdom
+- 不调用 LLM API。
+- 不提供 Agent 工作流编排。
+- 不包含云同步、账号系统、SSO、权限管理或审计日志。
+- 不支持实时多人协同编辑。
 
-## Requirements
+## 技术栈
 
-- Node.js 24 or newer
+- 前端：React、TypeScript、Vite
+- 后端：Fastify
+- 存储：Node.js `node:sqlite` + SQLite FTS5
+- 桌面端：Electron
+- 测试：Vitest、Testing Library、jsdom
+
+## 运行要求
+
+- Node.js 24 或更高版本
 - npm
 
-The project uses Node's built-in `node:sqlite`, so Node 24+ is required.
+本项目使用 Node.js 内置的 `node:sqlite`，因此需要 Node.js 24+。
 
-## Quick Start
+## 快速开始
 
-Install dependencies:
+安装依赖：
 
 ```bash
 npm install
 ```
 
-Run the local web app and open the browser automatically:
+启动本地 Web 应用并自动打开浏览器：
 
 ```bash
 npm run open:web
 ```
 
-On Windows, you can also double-click:
+Windows 用户也可以双击：
 
 ```text
 Prompt Vault Web.cmd
 ```
 
-The fixed local entry is:
+固定本地入口：
 
 ```text
 http://127.0.0.1:4317
 ```
 
-Keep the terminal window open while using the local website. Press `Ctrl+C` to stop the local server.
+使用本地网站时需要保持终端窗口运行。停止服务可按 `Ctrl+C`。
 
-## Development
+## 常用命令
 
-Run API and Vite dev server together:
+同时启动 API 和 Vite 开发服务：
 
 ```bash
 npm run dev
 ```
 
-Development web entry:
+开发环境入口：
 
 ```text
 http://127.0.0.1:5173
 ```
 
-Build production assets:
+构建前端资源：
 
 ```bash
 npm run build
 ```
 
-Run the production local server:
+启动生产模式本地服务：
 
 ```bash
 npm start
 ```
 
-Run the desktop app:
+启动桌面端：
 
 ```bash
 npm run desktop
 ```
 
-Build a Windows installer/package:
+构建 Windows 桌面安装包/应用包：
 
 ```bash
 npm run make:win
 ```
 
-## Local Data
+## 本地数据与隐私
 
-The web app and Electron desktop app use the same local SQLite database by default.
+Web 应用和 Electron 桌面端默认共用同一个本地 SQLite 数据库。
 
-Default database locations:
+默认数据库位置：
 
 ```text
 Windows: %APPDATA%\Prompt Vault\prompt-vault.sqlite
@@ -114,35 +124,47 @@ macOS: ~/Library/Application Support/Prompt Vault/prompt-vault.sqlite
 Linux: ~/.local/share/prompt-vault/prompt-vault.sqlite
 ```
 
-On first run, if the shared user-data database does not exist, the app can migrate the legacy project database from:
+首次启动时，如果共享用户数据目录中还没有数据库，应用会尝试从旧的项目内数据库位置迁移：
 
 ```text
 data/prompt-vault.sqlite
 ```
 
-You can override the database path with:
+也可以通过环境变量覆盖数据库路径：
 
 ```bash
 PROMPT_VAULT_DB=/path/to/prompt-vault.sqlite npm start
 ```
 
-## Testing
+## 导入导出
 
-Run tests:
+导出文件为 JSON 格式，适合用于备份、迁移或分享 Prompt 包。导出内容包含：
+
+- Prompt 基础信息
+- 标签
+- 场景
+- 版本历史
+- 作者和导出时间等元数据
+
+导入时会进行基础结构校验，避免格式不完整的数据直接写入本地数据库。
+
+## 测试
+
+运行测试：
 
 ```bash
 npm test
 ```
 
-If the Vitest fork pool is slow or unstable in your local Windows environment, use:
+如果在 Windows 环境中遇到 Vitest fork pool 较慢或不稳定，可以使用：
 
 ```bash
 npm test -- --pool=threads
 ```
 
-## Repository Notes
+## 仓库说明
 
-Generated and local-only files are intentionally ignored, including:
+以下生成文件和本地文件不会提交到仓库：
 
 - `node_modules/`
 - `dist/`
@@ -150,7 +172,7 @@ Generated and local-only files are intentionally ignored, including:
 - `data/`
 - `tmp/`
 - `.vs/`
-- local `.env` files
+- 本地 `.env` 文件
 
 ## License
 
